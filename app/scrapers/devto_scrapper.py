@@ -1,3 +1,4 @@
+import logging
 import time
 from app.scrapers.base_scrapper import BaseScrapper
 
@@ -13,7 +14,7 @@ class DevtoScrapper(BaseScrapper):
             url = f"https://dev.to/api/articles?tag={tag}&per_page={per_page}"
             response = self.scrape(url)
             if not response:
-                print(f"Skipping tag '{tag}'")
+                logging.info(f"Skipping tag '{tag}'")
                 continue
             for item in response:
                 articles.append({

@@ -1,18 +1,24 @@
+import logging
+from pathlib import Path
+
 import chromadb
 from sentence_transformers import SentenceTransformer
 
-client = chromadb.Client()
+ROOT_PATH = Path(__file__).resolve().parents[2]
+CHROMA_PATH = ROOT_PATH / "chroma_db"
+
+client = chromadb.PersistentClient(path=CHROMA_PATH)
 collection = client.get_or_create_collection(name="articles")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 def search_articles(query, top_k=5):
+    logging.info("Collection count in search: %d", collection.count())
     query_embeddings = model.encode(query).tolist()
-
     results = collection.query(
         query_embeddings=[query_embeddings],
         n_results=top_k,
     )
-
+    print(results)
     return format_query_results(results)
 
 def format_query_results(results):
@@ -24,9 +30,12 @@ def format_query_results(results):
 
     for id, document, metadata, distance in zip(ids, documents, metadatas, distances):
         formatted_results.append({
-            "id": id,
-            "document": document,
-            "metadata": metadata,
+            "uuid": id,
+            "title": metadata["title"],
+            "url": metadata["url"],
+            "source": metadata["source"],
+            "snippet": metadata["content"][:2000],
+            "score": 1-distance,
         })
 
     return formatted_results
