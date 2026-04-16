@@ -52,9 +52,9 @@ def get_article_by_id(article_id: str, db: Session = Depends(get_db)):
         HTTPException: If the article is not found.
     """
     article = db.query(Article).filter(Article.uuid == article_id).first()
-    logging.info(f"Fetched article with id: {article_id} , url: {article.url}, title: {article.title}")
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
+    logging.info(f"Fetched article with id: {article_id} , url: {article.url}, title: {article.title}")
     return article
 
 
