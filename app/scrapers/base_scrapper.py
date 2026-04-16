@@ -1,13 +1,14 @@
 import csv
+import logging
 import time
 import requests
 
 
 def build_csv(results):
-    print("Building CSV...")
+    logging.info("Building CSV...")
 
     if not results:
-        print("Data invalid or missing")
+        logging.info("Data invalid or missing")
         return
     fieldnames = results[0].keys()
     website = results[0].get("source")
@@ -15,7 +16,7 @@ def build_csv(results):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(results)
-
+    logging.info("CSV generated")
 
 class BaseScrapper(object):
 
@@ -23,10 +24,10 @@ class BaseScrapper(object):
         self.headers = {"User-Agent": "RAGSearchBot/1.0"}
 
     def scrape(self, url):
-        print("Scraping " + url)
+        logging.info("Scraping " + url)
         try:
             response = requests.get(url, headers=self.headers, timeout=10)
-            print("Status code: " + str(response.status_code))
+            logging.info("Status code: " + str(response.status_code))
             if not response:
                 return None
 
