@@ -25,7 +25,7 @@ def get_articles(page: int = Query(1, ge=1),
     """Returns full list of articles."""
     articles = db.query(Article).offset((page - 1) * page_size).limit(page_size).all()
     total_count = db.query(Article).count()
-    logging.info(f"Fetched {total_count} articles")
+    logging.info(f"Fetched %d articles", total_count)
     return {
         "total_count": total_count,
         "articles": articles,
@@ -36,7 +36,7 @@ def get_articles(page: int = Query(1, ge=1),
 def get_article_by_id(article_id: str, db: Session = Depends(get_db)):
     """Returns article by id"""
     article = db.query(Article).filter(Article.uuid == article_id).first()
-    logging.info(f"Fetched {article_id} article")
+    logging.info(f"Fetched article with id: {article_id} , url: {article.url}, title: {article.title}")
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
     return article

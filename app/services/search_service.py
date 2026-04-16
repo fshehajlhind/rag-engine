@@ -12,16 +12,24 @@ collection = client.get_or_create_collection(name="articles")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 def search_articles(query, top_k=5):
+    """Search the Chroma collection for k most similar articles to the query.
+    Args:
+        query: search query.
+        top_k: number of similar articles to return.
+    Returns:
+        articles: list of formatted article objects: {uuid, title, url,
+            source, snippet, and score}.
+    """
     logging.info("Collection count in search: %d", collection.count())
     query_embeddings = model.encode(query).tolist()
     results = collection.query(
         query_embeddings=[query_embeddings],
         n_results=top_k,
     )
-    print(results)
     return format_query_results(results)
 
 def format_query_results(results):
+    """Converts CHroma query results to a list of formatted article objects."""
     formatted_results = []
     ids = results["ids"][0]
     documents = results["documents"][0]
