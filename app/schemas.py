@@ -33,15 +33,9 @@ class SearchResult(BaseModel):
     score: float
     snippet: str
 
-class RagSource(BaseModel):
-    """Rag response item """
-    title: str
-    url: str
-    score: float
-
 class RagResponse(BaseModel):
     """Response returned by /rag-search."""
     query: str
     answer: str
-    sources: List[RagSource]
+    sources: List[str]
     confidence: float

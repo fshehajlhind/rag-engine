@@ -20,7 +20,7 @@ def search_articles(query, top_k=5):
         articles: list of formatted article objects: {uuid, title, url,
             source, snippet, and score}.
     """
-    logging.info("Collection count in search: %d", collection.count())
+    logging.info(f"Collection count in search: {collection.count()}", )
     query_embeddings = model.encode(query).tolist()
     results = collection.query(
         query_embeddings=[query_embeddings],

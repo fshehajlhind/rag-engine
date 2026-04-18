@@ -36,7 +36,7 @@ def scrape_and_load(db):
 
         db.commit()
         source = results[0]["source"] if results else "unknown"
-        logger.info(f"Inserted {inserted_results} results for source {source}")
+        logger.info(f"Inserted %d results for source: %s", inserted_results, source)
 
 if __name__ == "__main__":
     logging.basicConfig(

@@ -22,7 +22,7 @@ def health():
 def get_articles(page: int = Query(1, ge=1),
                  page_size: int = Query(10, ge=1, le=50),
                  db: Session = Depends(get_db)):
-    """Returns full list of articles.
+    """Returns the paginated list of articles.
      Args:
         page (int): Page number >= 1.
         page_size (int): Number of articles to return per page.
@@ -42,7 +42,7 @@ def get_articles(page: int = Query(1, ge=1),
 
 @router.get("/articles/{article_id}", response_model=ArticleOut)
 def get_article_by_id(article_id: str, db: Session = Depends(get_db)):
-    """Returns article by id
+    """Returns article for the given id
     Args:
         article_id: uuid of the article.
         db: Database session.
@@ -54,7 +54,8 @@ def get_article_by_id(article_id: str, db: Session = Depends(get_db)):
     article = db.query(Article).filter(Article.uuid == article_id).first()
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
-    logging.info(f"Fetched article with id: {article_id} , url: {article.url}, title: {article.title}")
+    logging.info(f"Fetched article with id: %s , url: %s, title: %s",
+                 article_id, article.url, article.title)
     return article
 
 
@@ -67,7 +68,7 @@ def get_stats(db: Session = Depends(get_db)):
          dict: Dictionary of article counts for each source together with teh source.
     """
     grouped_articles = db.query(Article.source, func.count(Article.uuid)).group_by(Article.source).all()
-    logging.info("Grouped articles by source ", grouped_articles)
+    logging.info("Grouped articles by source %s", grouped_articles)
     return {
         "stats": [
             { "count": count,

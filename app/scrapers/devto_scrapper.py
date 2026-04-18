@@ -14,7 +14,7 @@ class DevtoScrapper(BaseScrapper):
             url = f"https://dev.to/api/articles?tag={tag}&per_page={per_page}"
             response = self.scrape(url)
             if not response:
-                logging.info(f"Skipping tag '{tag}'")
+                logging.info(f"Skipping tag %s", tag)
                 continue
             for item in response:
                 articles.append({

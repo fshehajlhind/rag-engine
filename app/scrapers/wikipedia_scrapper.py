@@ -14,7 +14,7 @@ class WikipediaScraper(BaseScrapper):
         for topic in self.topics[:limit]:
             url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{topic.replace(" ", "_")}"
             data = self.scrape(url)
-            logging.info("wiki data: ", data)
+            logging.info(f"wiki data: {data}")
             if not data:
                 continue
             articles.append({
