@@ -12,7 +12,7 @@ class WikipediaScraper(BaseScrapper):
     def fetch(self, limit=3):
         articles = []
         for topic in self.topics[:limit]:
-            url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{topic.replace(" ", "_")}"
+            url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{topic}"
             data = self.scrape(url)
             logging.info(f"wiki data: {data}")
             if not data:
