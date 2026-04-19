@@ -25,8 +25,7 @@ def test_get_artice_by_id_found(client):
 
     all_articles_json = all_articles_response.json()["articles"]
     uuid = all_articles_json[0]["uuid"]
-    print("UUID: ", uuid)
-    get_by_id_response = client.get(f"/articles")
+    get_by_id_response = client.get(f"/articles/{uuid}")
     assert get_by_id_response.status_code == 200
     # article = get_by_id_response.json()
 

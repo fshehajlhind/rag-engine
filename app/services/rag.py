@@ -3,10 +3,12 @@ import os
 from statistics import mean
 
 import requests
+from dotenv import load_dotenv
 
 from app.models import Article
 from app.services.search_service import search_articles
 
+load_dotenv()
 
 def create_content(articles: list[Article]):
     context_articles = []
@@ -24,11 +26,11 @@ def create_content(articles: list[Article]):
 def call_llm(prompt) -> str:
     if os.getenv("LLM_PROVIDER") == "offline":
         logging.info("Using offline mode")
-        ollama_url = os.getenv("LLM_URL") + "/api/generate"
-        ollama_model = os.getenv("LLM_MODEL")
+        ollama_url = os.getenv("OLLAMA_URL") + "/api/generate"
+        ollama_model = os.getenv("OLLAMA_MODEL")
         try:
             response = requests.post(ollama_url, json=
-            {"model": ollama_model, "prompt": prompt})
+            {"model": ollama_model, "prompt": prompt, "stream": False}, timeout=30)
             response.raise_for_status()
         except requests.Timeout:
             logging.error("Request timed out")
@@ -42,7 +44,12 @@ def call_llm(prompt) -> str:
             logging.error("Invalid JSON")
             return ""
         return data.response
+    elif os.getenv("LLM_PROVIDER") == "online":
+        logging.info("Using online mode")
+        # TO DO
+        return ""
     else:
+        logging.info("No provider configured")
         return ""
 
 
@@ -66,13 +73,23 @@ from a document, cite it using its identifier.
     Answer:
     """
     answer = call_llm(llm_prompt)
+    logging.info("LLM answer: %s", answer)
+
+    if answer:
+        return {
+            "query": query,
+            "sources": [],
+            answer: "The language model is unavailable.",
+            "confidence": 0
+        }
 
     scores = [article["score"] for article in results]
     confidence = mean(scores) if scores else 0
+    logging.info("Confidence: %f", confidence)
 
     return {
         "query": query,
         "answer": answer,
-        "sources": [article["source"] for article in results],
+        "sources": [article["url"] for article in results],
         "confidence": confidence
     }
