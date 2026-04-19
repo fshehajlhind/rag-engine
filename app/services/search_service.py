@@ -2,8 +2,6 @@ import logging
 from pathlib import Path
 
 import chromadb
-from chromadb import K
-from chromadb.execution.expression import Eq, And
 from sentence_transformers import SentenceTransformer
 
 ROOT_PATH = Path(__file__).resolve().parents[2]
@@ -19,7 +17,7 @@ def search_articles(query, source=None, top_k=5):
     Args:
         query: search query.
         top_k: number of similar articles to return.
-        source: name of source(e.g wikipedia,reddit)
+        source: name of source(e.g wikipedia, reddit)
     Returns:
         articles: list of formatted article objects: {uuid, title, url,
             source, snippet, and score}.
