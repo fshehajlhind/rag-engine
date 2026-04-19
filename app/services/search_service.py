@@ -42,7 +42,7 @@ def format_query_results(results):
             "title": metadata["title"],
             "url": metadata["url"],
             "source": metadata["source"],
-            "snippet": metadata["content"][:2000],
+            "content": metadata["content"][:2000],
             "score": 1-distance,
         })
 

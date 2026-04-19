@@ -14,7 +14,7 @@ logging.basicConfig(
 )
 
 @asynccontextmanager
-async def lifespan():
+async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine) # db is created on startup
     yield
 app = FastAPI(title="RAG Search Engine", lifespan=lifespan)
