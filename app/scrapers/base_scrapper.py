@@ -18,27 +18,35 @@ def build_csv(results):
         writer.writerows(results)
     logging.info("CSV generated")
 
+
 class BaseScrapper(object):
 
     def __init__(self):
         self.headers = {"User-Agent": "RAGSearchBot/1.0"}
 
     def scrape(self, url):
-        logging.info("Scraping " + url)
-        try:
-            response = requests.get(url, headers=self.headers, timeout=10)
-            logging.info("Status code: " + str(response.status_code))
-            if not response:
-                return None
-
-            if response.status_code == 429:
-                time.sleep(10)
+        logging.info("Scraping %s", url)
+        max_retries = 5
+        backoff = 1
+        for attempt in range(max_retries):
+            try:
                 response = requests.get(url, headers=self.headers, timeout=10)
+                logging.info("Status code: %d", response.status_code)
 
-            if response.status_code != 200:
+                if response.status_code == 200:
+                    return response.json()
+
+                if response.status_code == 429:
+                    retry_time = backoff * (2 ** attempt)
+                    logging.info("Received HTTP 429, retrying in: %d seconds", retry_time)
+                    time.sleep(retry_time)
+                    continue
+
+                logging.error("Received status code %d, error: %s ", response.status_code, response.reason)
+                return None
+            except requests.RequestException as e:
+                logging.error("Request exception %s", e)
                 return None
 
-            data = response.json()
-            return data
-        except requests.RequestException:
-            return None
+        logging.info("Max retries for url: %s reached. Received HTTP 429 Too Many Requests.", url)
+        return None
