@@ -21,9 +21,9 @@ def health():
 
 @router.get("/articles", response_model=ArticleList)
 def get_articles(page: int = Query(1, ge=1),
-                 page_size: int = Query(10, ge=1, le=50),
+                 page_size: int|None = Query(None, ge=1, le=50),
                  db: Session = Depends(get_db)):
-    """Returns the paginated list of articles.
+    """ Returns the paginated list of articles.
      Args:
         page (int): Page number >= 1.
         page_size (int): Number of articles to return per page.
@@ -32,7 +32,10 @@ def get_articles(page: int = Query(1, ge=1),
           total_count (int): Total number of articles.
           articles (List[ArticleOut]): List of articles.
     """
-    articles = db.query(Article).offset((page - 1) * page_size).limit(page_size).all()
+    if page_size is None:
+        articles = db.query(Article).all()
+    else:
+        articles = db.query(Article).offset((page - 1) * page_size).limit(page_size).all()
     total_count = db.query(Article).count()
     logging.info(f"Fetched %d articles", total_count)
     return {
