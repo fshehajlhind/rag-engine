@@ -95,10 +95,10 @@ def get_stats(db: Session = Depends(get_db)):
 @router.post("/search", response_model=list[SearchResult])
 def search(request: SearchRequest):
     """Returns top k search results for the given query."""
-    return search_articles(request.query, request.source, request.top_k)
+    return search_articles(request.query, request.source, request.date_from, request.top_k)
 
 
 @router.post("/rag-search", response_model=RagResponse)
 async def rag_search(request: SearchRequest):
     """Returns LLM response for the given query based on retrieved articles."""
-    return await rag_search_service(request.query, top_k=request.top_k)
+    return await rag_search_service(request.query, request.source, request.date_from, top_k=request.top_k)
