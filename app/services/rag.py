@@ -30,7 +30,7 @@ def call_llm(prompt) -> str:
         ollama_model = os.getenv("OLLAMA_MODEL")
         try:
             response = requests.post(ollama_url, json=
-            {"model": ollama_model, "prompt": "what is AI?", "stream": False}, timeout=60)
+            {"model": ollama_model, "prompt": prompt, "stream": False}, timeout=60)
             response.raise_for_status()
         except requests.Timeout:
             logging.error("Request timed out")
