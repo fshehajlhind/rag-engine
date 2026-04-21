@@ -30,7 +30,7 @@ def call_llm(prompt) -> str:
         ollama_model = os.getenv("OLLAMA_MODEL")
         try:
             response = requests.post(ollama_url, json=
-            {"model": ollama_model, "prompt": prompt, "stream": False}, timeout=30)
+            {"model": ollama_model, "prompt": "what is AI?", "stream": False}, timeout=60)
             response.raise_for_status()
         except requests.Timeout:
             logging.error("Request timed out")
@@ -43,7 +43,7 @@ def call_llm(prompt) -> str:
         except ValueError:
             logging.error("Invalid JSON")
             return ""
-        return data.response
+        return data["response"]
     elif os.getenv("LLM_PROVIDER") == "online":
         logging.info("Using online mode")
         # TO DO
@@ -53,8 +53,8 @@ def call_llm(prompt) -> str:
         return ""
 
 
-async def rag_search_service(query: str, top_k: int = 5):
-    results = search_articles(query, top_k)
+async def rag_search_service(query: str, source: str=None, date_from=None, top_k: int = 5):
+    results = search_articles(query, source, date_from, top_k)
     if not results:
         return {
             "query": query,
@@ -75,11 +75,11 @@ from a document, cite it using its identifier.
     answer = call_llm(llm_prompt)
     logging.info("LLM answer: %s", answer)
 
-    if answer:
+    if not answer:
         return {
             "query": query,
-            "sources": [],
-            answer: "The language model is unavailable.",
+            "sources": [article["url"] for article in results],
+            "answer": "LLM request timed out.",
             "confidence": 0
         }
 

@@ -1,3 +1,4 @@
+import datetime
 import logging
 from pathlib import Path
 
@@ -12,26 +13,39 @@ collection = client.get_or_create_collection(name="articles")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
-def search_articles(query, source=None, top_k=5):
+def search_articles(query, source=None, date_from=None, top_k=5):
     """Search the Chroma collection for k most similar articles to the query.
     Args:
         query: search query.
         top_k: number of similar articles to return.
         source: name of source(e.g wikipedia, reddit)
+        date_from: filter articles scraped after this date.
     Returns:
         articles: list of formatted article objects: {uuid, title, url,
             source, snippet, and score}.
     """
     logging.info(f"Collection count in search: {collection.count()}", )
     query_embeddings = model.encode(query).tolist()
-    query_params = {
-        "query_embeddings": [query_embeddings],
-        "n_results": top_k
-    }
+    query_params = {"query_embeddings": [query_embeddings], "n_results": top_k}
     if source:
         query_params["where"] = {"source": source}
+
     results = collection.query(**query_params)
-    return format_query_results(results)
+    formatted_results = format_query_results(results)
+    filtered_by_date_results = []
+    if date_from:
+        for article in formatted_results:
+            article_date = article.get("date")
+            if not article_date:
+                continue
+            try:
+                article_date = datetime.datetime.fromisoformat(article_date).date()
+                if article_date >= date_from:
+                    filtered_by_date_results.append(article)
+            except ValueError:
+                continue
+        return filtered_by_date_results[:top_k]
+    return formatted_results[:top_k]
 
 
 def format_query_results(results):
@@ -50,6 +64,7 @@ def format_query_results(results):
             "title": metadata["title"],
             "url": metadata["url"],
             "source": metadata["source"],
+            "date": metadata.get("date"),
             "content": metadata["content"][:2000],
             "score": 1 - distance,
         })

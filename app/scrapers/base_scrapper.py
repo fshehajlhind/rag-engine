@@ -1,6 +1,8 @@
 import csv
 import logging
 import time
+from pathlib import Path
+
 import requests
 
 
@@ -12,7 +14,8 @@ def build_csv(results):
         return
     fieldnames = results[0].keys()
     website = results[0].get("source")
-    with open(f"../../data/{website}.csv", "w", newline="", encoding="utf-8") as csvfile:
+    root_dir = Path(__file__).resolve().parents[2]
+    with open(root_dir / "data" / f"{website}.csv", "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(results)

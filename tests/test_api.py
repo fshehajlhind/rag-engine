@@ -27,8 +27,8 @@ def test_get_artice_by_id_found(client):
     uuid = all_articles_json[0]["uuid"]
     get_by_id_response = client.get(f"/articles/{uuid}")
     assert get_by_id_response.status_code == 200
-    # article = get_by_id_response.json()
-
+    article = get_by_id_response.json()
+    assert article["uuid"] == uuid
 
 def test_health(client):
     response = client.get("/health")
