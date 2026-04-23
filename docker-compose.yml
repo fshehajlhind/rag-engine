@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  rag-app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - sqlite_data:/app/data
+      - chroma_data:/app/chroma_db
+    env_file:
+      - .env
+
+volumes:
+  sqlite_data:
+  chroma_data:

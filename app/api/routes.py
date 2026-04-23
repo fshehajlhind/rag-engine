@@ -16,7 +16,7 @@ router = APIRouter()
 @router.get("/health")
 def health():
     """Health check endpoint."""
-    return {"message": "OK"}
+    return {"status": "OK"}
 
 
 @router.get("/articles", response_model=ArticleList)
@@ -37,7 +37,7 @@ def get_articles(page: int = Query(1, ge=1),
     else:
         articles = db.query(Article).offset((page - 1) * page_size).limit(page_size).all()
     total_count = db.query(Article).count()
-    logging.info(f"Fetched %d articles", total_count)
+    logging.info("Fetched %d articles", total_count)
     return {
         "total_count": total_count,
         "articles": articles,
