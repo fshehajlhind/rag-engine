@@ -10,6 +10,27 @@ where users can ask questions. The answers are generated using an AI model and b
 - Builds embeddings and indexes them in ChromaDB
 - Exposes REST API endpoints
 
+## Project Structure
+
+```text
+app/
+├── api/            # API routes
+├── services/       # ingestion, embedding, search and rag services
+├── scrapers/       # scrapers for each website
+├── models.py       # SQLAlchemy models
+├── schemas.py      # Pydantic schemas
+├── database.py     # DB setup 
+└── main.py         # 
+
+tests/              # automated tests
+data/               # generated CSV files
+```
+## Prerequisites
+- Python 3
+- pip
+- Docker
+- Ollama with a downloaded model
+
 ## Local Setup
 
 1. Clone the repository
@@ -48,7 +69,7 @@ To run all automated tests
   python -m pytest tests/test_api.py 
 ```
 ## Docker setup
-1. Build the image and start the app container
+1. Build the image and start the app container on port 8000
 ```bash
    docker-compose up --build
 ```
