@@ -1,3 +1,4 @@
+import string
 from datetime import date
 from typing import List
 
@@ -35,9 +36,16 @@ class SearchResult(BaseModel):
     score: float
     content: str
 
+class Source(BaseModel):
+    """List of sources returned by rag for the top matching articles"""
+    title: str
+    url: str
+    score: float
+
+
 class RagResponse(BaseModel):
     """Response returned by /rag-search."""
     query: str
     answer: str
-    sources: List[str]
+    sources: List[Source]
     confidence: float
