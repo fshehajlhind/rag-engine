@@ -1,17 +1,20 @@
+import os
+
+
 def test_get_articles(client):
     response = client.get("/articles")
     assert response.status_code == 200
     response_json = response.json()
-    assert response_json["total_count"] == 2
+    assert response_json["total_count"] == 3
 
 
 def test_get_articles_paginated(client):
-    response = client.get("/articles?page_size=1&page=2")
+    response = client.get("/articles?page_size=2&page=1")
     assert response.status_code == 200
     response_json = response.json()
-    assert response_json["total_count"] == 2
-    assert len(response_json["articles"]) == 1
-    assert response_json["articles"][0]["url"] == "https://reddit.com/wiki/Artificial_Intelligence"
+    assert response_json["total_count"] == 3
+    assert len(response_json["articles"]) == 2
+    assert response_json["articles"][0]["title"] == "AI — weekly megathread!"
 
 
 def test_get_article_by_id_not_found(client):
@@ -44,7 +47,7 @@ def test_get_stats(client):
     response_json = response.json()
     assert response_json["stats"] == [
         {
-            "count": 1,
+            "count": 2,
             "source": "reddit",
         },
         {
@@ -52,3 +55,17 @@ def test_get_stats(client):
             "source": "wikipedia",
         },
     ]
+
+def test_rag_llm_not_configured(client):
+    del os.environ['OLLAMA_URL']
+    response = client.post(
+        "/rag-search",
+        json={
+            "query": "What is AI?",
+            "top_k": 5,
+        },
+    )
+    response_json = response.json()
+    assert response.status_code == 200
+    assert response_json["query"] == "What is AI?"
+    assert "Summary of the most relevant article: " in response_json["answer"]

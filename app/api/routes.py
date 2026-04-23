@@ -7,7 +7,7 @@ from sqlalchemy import func
 from app.database import get_db
 from app.models import Article
 from app.schemas import ArticleList, ArticleOut, SearchRequest, SearchResult, RagResponse
-from app.services.rag import rag_search_service
+from app.services.rag_service import rag_search_service
 from app.services.search_service import search_articles
 
 router = APIRouter()
@@ -33,9 +33,9 @@ def get_articles(page: int = Query(1, ge=1),
           articles (List[ArticleOut]): List of articles.
     """
     if page_size is None:
-        articles = db.query(Article).all()
+        articles = db.query(Article).order_by(Article.title).all()
     else:
-        articles = db.query(Article).offset((page - 1) * page_size).limit(page_size).all()
+        articles = db.query(Article).order_by(Article.title).offset((page - 1) * page_size).limit(page_size).all()
     total_count = db.query(Article).count()
     logging.info("Fetched %d articles", total_count)
     return {
