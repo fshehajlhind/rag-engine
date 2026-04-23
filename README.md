@@ -39,8 +39,17 @@ separated by space, like below:
      ```
 6. Open the API documentation which includes the list of endpoints at http://localhost:8080/docs
 
+7. Add the LLM environment variables as in the template .env.example. Make sure Ollama is running and the model is 
+downloaded. You can check the loaded models here: http://{OLLAMA_BASE_URL}/api/tags
+
 ## Testing
 To run all automated tests 
 ```bash
   python -m pytest tests/test_api.py 
 ```
+## Docker setup
+1. Build the image and start the app container
+```bash
+   docker-compose up --build
+```
+2. The API Schema can be viewed at http://localhost:8000/docs
