@@ -62,11 +62,12 @@ separated by space, like below:
 
 7. Add the LLM environment variables as in the template .env.example. Make sure Ollama is running and the model is 
 downloaded. You can check the loaded models here: http://{OLLAMA_BASE_URL}/api/tags
-
+> **Note:** The application can still run without LLM configuration. In that case the /rag-search would return 
+as response the summary of the most relevant article.
 ## Testing
 To run all automated tests 
 ```bash
-  python -m pytest tests/test_api.py 
+  pytest 
 ```
 ## Docker setup
 1. Build the image and start the app container on port 8000

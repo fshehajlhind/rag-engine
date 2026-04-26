@@ -48,7 +48,7 @@ def search_articles(query, source=None, date_from=None, top_k=5):
     return formatted_results[:top_k]
 
 
-def format_query_results(results):
+def format_query_results(results) -> list[dict]:
     """Converts CHroma query results to a list of formatted article objects."""
     logging.info(f"Formatting query results")
 

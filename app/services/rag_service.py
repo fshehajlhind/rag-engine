@@ -53,6 +53,9 @@ async def call_llm(prompt: str, articles: list[dict]) -> str:
     except httpx.HTTPStatusError as e:
         logging.error("Error status: %d  %s", e.response.status_code, e.response.text)
         return ""
+    except httpx.RequestError as e:
+        logging.error("Error request: %s", e)
+        return ""
     try:
         data = response.json()
     except ValueError:

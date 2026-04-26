@@ -6,7 +6,7 @@ from pathlib import Path
 import requests
 
 
-def build_csv(results):
+def build_csv(results: list[dict]):
     logging.info("Building CSV...")
 
     if not results:
