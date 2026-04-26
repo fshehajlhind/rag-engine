@@ -37,11 +37,16 @@ data/               # generated CSV files
     ```bash
    git clone https://github.com/fshehajlhind/rag-engine.git
    ```
+2. Create and activate virtual environment    
+   ```bash
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
 3. Install dependencies
     ```bash
     pip install -r requirements.txt
    ```
-3. Run the ingestion step which scrapes all the websites(Wikipedia, Reddit, Devto) and stores data as CSVs and loads them in the database.
+4. Run the ingestion step which scrapes all the websites(Wikipedia, Reddit, Devto) and stores data as CSVs and loads them in the database.
     ```bash
     python -m app.services.ingestion_service
    ``` 
@@ -50,17 +55,17 @@ separated by space, like below:
     ```bash
     python -m app.services.ingestion_service --source source1 source2
     ```
-4. Run the embedding step to generate embeddings from the articles stored in DB and index them in the ChromaDB
+5. Run the embedding step to generate embeddings from the articles stored in DB and index them in the ChromaDB
     ```bash
       python -m app.services.embedding_service
    ```
-5. Start the application
+6. Start the application
     ```bash
    uvicorn app.main:app --reload --port 8080
      ```
-6. Open the API documentation which includes the list of endpoints at http://localhost:8080/docs
+7. Open the API documentation which includes the list of endpoints at http://localhost:8080/docs
 
-7. Add the LLM environment variables as in the template .env.example. Make sure Ollama is running and the model is 
+8. Add the LLM environment variables as in the template .env.example. Make sure Ollama is running and the model is 
 downloaded. You can check the loaded models here: http://{OLLAMA_BASE_URL}/api/tags
 > **Note:** The application can still run without LLM configuration. In that case the /rag-search would return 
 as response the summary of the most relevant article.
@@ -70,8 +75,9 @@ To run all automated tests
   pytest 
 ```
 ## Docker setup
-1. Build the image and start the app container on port 8000
+1. Set OLLAMA_URL=http://host.docker.internal:11434
+2. Build the image and start the app container on port 8000
 ```bash
    docker-compose up --build
 ```
-2. The API Schema can be viewed at http://localhost:8000/docs
+3. The API Schema can be viewed at http://localhost:8000/docs
