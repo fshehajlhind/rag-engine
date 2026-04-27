@@ -31,7 +31,8 @@ def create_context(articles: list[dict])-> str:
 async def call_llm(prompt: str, articles: list[dict]) -> str:
     ollama_url = os.getenv("OLLAMA_URL")
     model = os.getenv("OLLAMA_MODEL")
-
+    logging.info(f"Using OLLAMA URL: {ollama_url}")
+    logging.info(f"Using OLLAMA MODEL: {model}")
     if not ollama_url or not model:
         logging.info("LLM not configured")
         logging.info("Most relevant article %s", articles[0]['title'])
@@ -47,11 +48,17 @@ async def call_llm(prompt: str, articles: list[dict]) -> str:
             response = await client.post(ollama_url + "/api/generate", headers=headers,
                                      json={"model": model, "prompt": prompt, "stream": False})
             response.raise_for_status()
+    except httpx.ConnectError as e:
+        logging.error("Could not connect to Ollama: %s", e)
+        return ""
     except httpx.TimeoutException:
         logging.error("Request timed out")
         return ""
     except httpx.HTTPStatusError as e:
         logging.error("Error status: %d  %s", e.response.status_code, e.response.text)
+        return ""
+    except httpx.RequestError as e:
+        logging.error("Error request: %s", e)
         return ""
     try:
         data = response.json()

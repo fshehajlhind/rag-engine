@@ -1,12 +1,14 @@
 import logging
+from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Response
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.database import get_db
 from app.models import Article
 from app.schemas import ArticleList, ArticleOut, SearchRequest, SearchResult, RagResponse
+from app.services.articles_service import get_articles_dict, get_article_dict_by_id, get_article_stats
+from app.services.export_service import export_files
 from app.services.rag_service import rag_search_service
 from app.services.search_service import search_articles
 
@@ -21,7 +23,7 @@ def health():
 
 @router.get("/articles", response_model=ArticleList)
 def get_articles(page: int = Query(1, ge=1),
-                 page_size: int|None = Query(None, ge=1, le=50),
+                 page_size: int | None = Query(None, ge=1, le=50),
                  db: Session = Depends(get_db)):
     """ Returns the paginated list of articles.
      Args:
@@ -32,16 +34,7 @@ def get_articles(page: int = Query(1, ge=1),
           total_count (int): Total number of articles.
           articles (List[ArticleOut]): List of articles.
     """
-    if page_size is None:
-        articles = db.query(Article).order_by(Article.title).all()
-    else:
-        articles = db.query(Article).order_by(Article.title).offset((page - 1) * page_size).limit(page_size).all()
-    total_count = db.query(Article).count()
-    logging.info("Fetched %d articles", total_count)
-    return {
-        "total_count": total_count,
-        "articles": articles,
-    }
+    return get_articles_dict(db, page, page_size)
 
 
 @router.get("/articles/{article_id}", response_model=ArticleOut
@@ -64,11 +57,11 @@ def get_article_by_id(article_id: str, db: Session = Depends(get_db)):
      Raises:
         HTTPException: If the article is not found.
     """
-    article = db.query(Article).filter(Article.uuid == article_id).first()
+    article = get_article_dict_by_id(db=db, article_id=article_id)
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
     logging.info("Fetched article with id: %s , url: %s, title: %s",
-                 article_id, article.url, article.title)
+                 article_id, article["url"], article["title"])
     return article
 
 
@@ -80,21 +73,20 @@ def get_stats(db: Session = Depends(get_db)):
      Returns:
          dict: Dictionary of article counts for each source together with teh source.
     """
-    grouped_articles = db.query(Article.source, func.count(Article.uuid)).group_by(Article.source).all()
-    logging.info("Grouped articles by source %s", grouped_articles)
-    return {
-        "stats": [
-            {"count": count,
-             "source": source,
-             }
-            for source, count in grouped_articles
-        ]
-    }
+    return get_article_stats(db)
 
 
 @router.post("/search", response_model=list[SearchResult])
 def search(request: SearchRequest):
-    """Returns top k search results for the given query."""
+    """Returns top k search results for the given query.
+       Args:
+            query: query given by users
+            top_k: top k search results
+            date_from: search articles from a given date
+            source: search articles give by source
+       Returns:
+            List with search results.
+    """
     return search_articles(request.query, request.source, request.date_from, request.top_k)
 
 
@@ -102,3 +94,22 @@ def search(request: SearchRequest):
 async def rag_search(request: SearchRequest):
     """Returns LLM response for the given query based on retrieved articles."""
     return await rag_search_service(request.query, request.source, request.date_from, top_k=request.top_k)
+
+
+@router.get("/export")
+def export_articles(output_format: Literal["csv", "jsonl"] = Query("csv"), db: Session = Depends(get_db)):
+    """Exports articles into a CSV or jsonl file.
+    Args:
+        db: Database session.
+        output_format (Literal["csv", "jsonl"]): Output format to export.
+    Returns:
+         dict:
+    """
+    logging.info("Exporting articles in %s format...", output_format)
+
+    content, media_type = export_files(output_format, db)
+    return Response(
+        content=content, media_type=media_type,  headers={
+            "Content-Disposition": f"attachment; filename=articles.{output_format}"
+        },
+    )
